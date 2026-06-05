@@ -9,9 +9,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  useEffect(() => { fetchData() }, [])
 
   async function fetchData() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -27,20 +25,23 @@ export default function Home() {
     setLoading(false)
   }
 
-  function createDinner() {
-    router.push('/(app)/create')
-  }
-
-  if (loading) return <ActivityIndicator style={{ flex: 1 }} />
+  if (loading) return <ActivityIndicator style={{ flex: 1 }} color="#FFB6C1" />
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>DateDiner</Text>
+      {/* Header */}
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.eyebrow}>Welkom terug</Text>
+          <Text style={styles.header}>DateDiner 🌸</Text>
+        </View>
+      </View>
 
+      {/* My dinners */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Mijn diners</Text>
-          <TouchableOpacity style={styles.addButton} onPress={createDinner}>
+          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/(app)/create')}>
             <Text style={styles.addButtonText}>+ Nieuw</Text>
           </TouchableOpacity>
         </View>
@@ -49,15 +50,25 @@ export default function Home() {
           scrollEnabled={false}
           keyExtractor={d => d.id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card} onPress={() => router.push(`/(app)/dinner/${item.id}`)}>
-              <Text style={styles.cardTitle}>{item.name}</Text>
-              <Text style={styles.cardSub}>{item.date ?? 'Datum nog niet ingesteld'}</Text>
+            <TouchableOpacity style={styles.dinnerCard} onPress={() => router.push(`/(app)/dinner/${item.id}`)}>
+              <View style={styles.dinnerCardAccent} />
+              <View style={styles.dinnerCardBody}>
+                <Text style={styles.cardTitle}>{item.name}</Text>
+                <Text style={styles.cardSub}>{item.date ? new Date(item.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Datum nog niet ingesteld'}</Text>
+              </View>
+              <Text style={styles.cardArrow}>›</Text>
             </TouchableOpacity>
           )}
-          ListEmptyComponent={<Text style={styles.empty}>Nog geen diners aangemaakt</Text>}
+          ListEmptyComponent={
+            <TouchableOpacity style={styles.emptyCard} onPress={() => router.push('/(app)/create')}>
+              <Text style={styles.emptyCardIcon}>🍽️</Text>
+              <Text style={styles.emptyCardText}>Maak je eerste diner aan</Text>
+            </TouchableOpacity>
+          }
         />
       </View>
 
+      {/* My requests */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Mijn verzoeken</Text>
         <FlatList
@@ -65,13 +76,19 @@ export default function Home() {
           scrollEnabled={false}
           keyExtractor={r => r.id}
           renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>{item.dinners?.name}</Text>
-              <View style={[styles.statusBadge,
+            <View style={styles.requestCard}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{item.dinners?.name}</Text>
+                {item.dinners?.date && <Text style={styles.cardSub}>{new Date(item.dinners.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}</Text>}
+              </View>
+              <View style={[
+                styles.statusBadge,
                 item.status === 'accepted' && styles.statusGreen,
                 item.status === 'rejected' && styles.statusRed,
               ]}>
-                <Text style={styles.statusText}>{item.status}</Text>
+                <Text style={styles.statusText}>
+                  {item.status === 'accepted' ? 'Geaccepteerd' : item.status === 'rejected' ? 'Afgewezen' : 'In behandeling'}
+                </Text>
               </View>
             </View>
           )}
@@ -83,19 +100,36 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F4EF', padding: 16, paddingTop: 60 },
-  header: { fontSize: 28, fontWeight: '600', marginBottom: 24 },
+  container: { flex: 1, backgroundColor: '#FFF0F5', padding: 20, paddingTop: 60 },
+
+  headerRow: { marginBottom: 28 },
+  eyebrow: { fontSize: 12, color: '#c47a8a', fontWeight: '600', letterSpacing: 0.5, marginBottom: 2 },
+  header: { fontSize: 28, fontWeight: '700', color: '#2d1f24', letterSpacing: -0.5 },
+
   section: { marginBottom: 28 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: '#1C1917', marginBottom: 10 },
-  addButton: { backgroundColor: '#1C1917', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  addButtonText: { color: '#fff', fontSize: 13, fontWeight: '600' },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#E7E5E4' },
-  cardTitle: { fontSize: 14, fontWeight: '600', color: '#1C1917' },
-  cardSub: { fontSize: 12, color: '#57534E', marginTop: 2 },
-  statusBadge: { marginTop: 6, backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20, alignSelf: 'flex-start' },
-  statusGreen: { backgroundColor: '#CCFBF1' },
-  statusRed: { backgroundColor: '#FEE2E2' },
-  statusText: { fontSize: 11, color: '#57534E', fontWeight: '600' },
-  empty: { color: '#A8A29E', fontSize: 13, textAlign: 'center', paddingVertical: 12 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#2d1f24', marginBottom: 10 },
+
+  addButton: { backgroundColor: '#FFB6C1', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
+  addButtonText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+
+  dinnerCard: { backgroundColor: '#fff', borderRadius: 14, marginBottom: 8, borderWidth: 1, borderColor: '#FFE4E1', flexDirection: 'row', alignItems: 'center', overflow: 'hidden' },
+  dinnerCardAccent: { width: 4, backgroundColor: '#FFB6C1', alignSelf: 'stretch' },
+  dinnerCardBody: { flex: 1, padding: 14 },
+  cardTitle: { fontSize: 14, fontWeight: '600', color: '#2d1f24' },
+  cardSub: { fontSize: 12, color: '#9e6b78', marginTop: 2 },
+  cardArrow: { fontSize: 20, color: '#FFC0CB', paddingRight: 14 },
+
+  emptyCard: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#FFD1DC', borderStyle: 'dashed', padding: 20, alignItems: 'center', gap: 6 },
+  emptyCardIcon: { fontSize: 28 },
+  emptyCardText: { fontSize: 13, color: '#c47a8a', fontWeight: '600' },
+
+  requestCard: { backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#FFE4E1', flexDirection: 'row', alignItems: 'center', gap: 12 },
+
+  statusBadge: { backgroundColor: '#FFE4E1', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  statusGreen: { backgroundColor: '#d1fae5' },
+  statusRed: { backgroundColor: '#fee2e2' },
+  statusText: { fontSize: 11, color: '#9e6b78', fontWeight: '700' },
+
+  empty: { color: '#c47a8a', fontSize: 13, textAlign: 'center', paddingVertical: 12 },
 })
