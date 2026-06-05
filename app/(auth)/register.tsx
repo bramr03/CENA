@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 
@@ -28,55 +28,81 @@ export default function Register() {
       })
     }
 
-    Alert.alert('Gelukt!', 'Check je e-mail om je account te bevestigen.')
+    Alert.alert('Gelukt! 🎉', 'Check je e-mail om je account te bevestigen.')
     router.replace('/(auth)/login')
     setLoading(false)
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>DateDiner</Text>
-      <Text style={styles.subtitle}>Account aanmaken</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
 
-      <TextInput
-        style={styles.input}
-        placeholder="Naam"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="E-mailadres"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Wachtwoord"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <View style={styles.logoArea}>
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoEmoji}>🌸</Text>
+          </View>
+          <Text style={styles.title}>DateDiner</Text>
+          <Text style={styles.subtitle}>Maak een account aan</Text>
+        </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Laden...' : 'Registreer'}</Text>
-      </TouchableOpacity>
+        <View style={styles.form}>
+          <Text style={styles.fieldLabel}>Naam</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Jouw naam"
+            value={name}
+            onChangeText={setName}
+            placeholderTextColor="#FFC0CB"
+          />
 
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.link}>Al een account? Inloggen</Text>
-      </TouchableOpacity>
-    </View>
+          <Text style={styles.fieldLabel}>E-mailadres</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="jouw@email.nl"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholderTextColor="#FFC0CB"
+          />
+
+          <Text style={styles.fieldLabel}>Wachtwoord</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="••••••••"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="#FFC0CB"
+          />
+
+          <TouchableOpacity style={[styles.button, loading && { opacity: 0.6 }]} onPress={handleRegister} disabled={loading}>
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Account aanmaken →</Text>}
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.link}>Al een account? <Text style={styles.linkBold}>Inloggen</Text></Text>
+        </TouchableOpacity>
+
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#F7F4EF' },
-  title: { fontSize: 32, fontWeight: '600', textAlign: 'center', marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#57534E', textAlign: 'center', marginBottom: 32 },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#E7E5E4', borderRadius: 10, padding: 14, fontSize: 15, marginBottom: 12 },
-  button: { backgroundColor: '#1C1917', borderRadius: 10, padding: 16, alignItems: 'center', marginTop: 4 },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  link: { textAlign: 'center', marginTop: 20, color: '#57534E', fontSize: 14 },
+  container: { flex: 1, backgroundColor: '#FFF0F5' },
+  content: { flexGrow: 1, justifyContent: 'center', padding: 28, paddingBottom: 40 },
+  logoArea: { alignItems: 'center', marginBottom: 36 },
+  logoCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#FFD1DC', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  logoEmoji: { fontSize: 32 },
+  title: { fontSize: 32, fontWeight: '700', color: '#2d1f24', letterSpacing: -0.5, marginBottom: 6 },
+  subtitle: { fontSize: 14, color: '#9e6b78' },
+  form: { marginBottom: 24 },
+  fieldLabel: { fontSize: 12, fontWeight: '600', color: '#9e6b78', marginBottom: 6, marginTop: 14, letterSpacing: 0.3 },
+  input: { backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#FFD1DC', borderRadius: 12, padding: 14, fontSize: 15, color: '#2d1f24' },
+  button: { backgroundColor: '#FFB6C1', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 20 },
+  buttonText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  link: { textAlign: 'center', color: '#9e6b78', fontSize: 14 },
+  linkBold: { color: '#c47a8a', fontWeight: '700' },
 })
