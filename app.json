@@ -2,6 +2,7 @@
   "expo": {
     "name": "datediner",
     "slug": "datediner",
+    "scheme": "datediner",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
