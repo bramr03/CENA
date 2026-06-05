@@ -27,17 +27,8 @@ export default function Home() {
     setLoading(false)
   }
 
-  async function createDinner() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data, error } = await supabase.from('dinners').insert({
-      name: 'Nieuw diner',
-      org_id: user.id,
-    }).select().single()
-
-    if (error) { Alert.alert('Error', error.message); return }
-    router.push(`/(app)/dinner/${data.id}`)
+  function createDinner() {
+    router.push('/(app)/create')
   }
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} />
