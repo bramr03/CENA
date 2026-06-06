@@ -12,6 +12,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [confirmSignOut, setConfirmSignOut] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [editName, setEditName] = useState('')
   const [editBio, setEditBio] = useState('')
@@ -53,20 +55,6 @@ export default function Profile() {
     if (error) Alert.alert('Error', error.message)
     else { setProfile(data); setEditing(false) }
     setSaving(false)
-  }
-
-  async function handleSignOut() {
-    Alert.alert('Uitloggen', 'Weet je zeker dat je wilt uitloggen?', [
-      { text: 'Annuleer', style: 'cancel' },
-      { text: 'Uitloggen', style: 'destructive', onPress: () => supabase.auth.signOut() },
-    ])
-  }
-
-  async function handleDeleteAccount() {
-    Alert.alert('Account verwijderen', 'Dit kan niet ongedaan worden gemaakt.', [
-      { text: 'Annuleer', style: 'cancel' },
-      { text: 'Verwijderen', style: 'destructive', onPress: () => supabase.auth.signOut() },
-    ])
   }
 
   function formatDate(dateStr: string | null) {
@@ -223,12 +211,44 @@ export default function Profile() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        <TouchableOpacity style={styles.outlineBtn} onPress={handleSignOut}>
-          <Text style={styles.outlineBtnText}>Uitloggen</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.dangerBtn} onPress={handleDeleteAccount}>
-          <Text style={styles.dangerBtnText}>Account verwijderen</Text>
-        </TouchableOpacity>
+
+        {/* Sign out confirm */}
+        {confirmSignOut ? (
+          <View style={styles.confirmCard}>
+            <Text style={styles.confirmText}>Weet je zeker dat je wilt uitloggen?</Text>
+            <View style={styles.confirmRow}>
+              <TouchableOpacity style={styles.confirmCancelBtn} onPress={() => setConfirmSignOut(false)}>
+                <Text style={styles.confirmCancelText}>Annuleer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.confirmActionBtn} onPress={() => supabase.auth.signOut()}>
+                <Text style={styles.confirmActionText}>Uitloggen</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.outlineBtn} onPress={() => setConfirmSignOut(true)}>
+            <Text style={styles.outlineBtnText}>Uitloggen</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Delete account confirm */}
+        {confirmDelete ? (
+          <View style={[styles.confirmCard, styles.confirmDangerCard]}>
+            <Text style={styles.confirmText}>Account permanent verwijderen? Dit kan niet ongedaan worden gemaakt.</Text>
+            <View style={styles.confirmRow}>
+              <TouchableOpacity style={styles.confirmCancelBtn} onPress={() => setConfirmDelete(false)}>
+                <Text style={styles.confirmCancelText}>Annuleer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.confirmDeleteBtn} onPress={() => supabase.auth.signOut()}>
+                <Text style={styles.confirmDeleteText}>Verwijderen</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.dangerBtn} onPress={() => setConfirmDelete(true)}>
+            <Text style={styles.dangerBtnText}>Account verwijderen</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
     </ScrollView>
@@ -281,8 +301,19 @@ const styles = StyleSheet.create({
 
   outlineBtn: { borderWidth: 1.5, borderColor: '#FFB6C1', borderRadius: 12, padding: 14, alignItems: 'center', marginBottom: 10 },
   outlineBtnText: { color: '#c47a8a', fontSize: 14, fontWeight: '700' },
-  dangerBtn: { borderWidth: 1.5, borderColor: '#fca5a5', borderRadius: 12, padding: 14, alignItems: 'center' },
+  dangerBtn: { borderWidth: 1.5, borderColor: '#fca5a5', borderRadius: 12, padding: 14, alignItems: 'center', marginTop: 10 },
   dangerBtnText: { color: '#ef4444', fontSize: 14, fontWeight: '700' },
+
+  confirmCard: { backgroundColor: '#fff', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#FFD1DC', marginBottom: 10 },
+  confirmDangerCard: { borderColor: '#fca5a5', marginTop: 10 },
+  confirmText: { fontSize: 13, color: '#2d1f24', marginBottom: 12, lineHeight: 18 },
+  confirmRow: { flexDirection: 'row', gap: 8 },
+  confirmCancelBtn: { flex: 1, backgroundColor: '#FFF0F5', borderRadius: 8, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: '#FFD1DC' },
+  confirmCancelText: { fontSize: 13, color: '#9e6b78', fontWeight: '600' },
+  confirmActionBtn: { flex: 1, backgroundColor: '#FFB6C1', borderRadius: 8, padding: 10, alignItems: 'center' },
+  confirmActionText: { fontSize: 13, color: '#fff', fontWeight: '700' },
+  confirmDeleteBtn: { flex: 1, backgroundColor: '#ef4444', borderRadius: 8, padding: 10, alignItems: 'center' },
+  confirmDeleteText: { fontSize: 13, color: '#fff', fontWeight: '700' },
 
   fieldLabel: { fontSize: 12, fontWeight: '600', color: '#9e6b78', marginBottom: 6, marginTop: 14, letterSpacing: 0.3 },
   input: { backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#FFD1DC', borderRadius: 12, padding: 14, fontSize: 14, color: '#2d1f24' },

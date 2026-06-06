@@ -11,8 +11,14 @@ export default function Register() {
   const router = useRouter()
 
   async function handleRegister() {
+    if (!name.trim()) { Alert.alert('Vul je naam in'); return }
+    if (!email.trim()) { Alert.alert('Vul je e-mailadres in'); return }
+    if (!email.includes('@')) { Alert.alert('Vul een geldig e-mailadres in'); return }
+    if (password.length < 6) { Alert.alert('Wachtwoord moet minimaal 6 tekens zijn'); return }
+
     setLoading(true)
-    const { data, error } = await supabase.auth.signUp({ email, password })
+
+    const { data, error } = await supabase.auth.signUp({ email: email.trim(), password })
 
     if (error) {
       Alert.alert('Error', error.message)
@@ -21,16 +27,21 @@ export default function Register() {
     }
 
     if (data.user) {
-      await supabase.from('profiles').insert({
+      const { error: profileError } = await supabase.from('profiles').upsert({
         id: data.user.id,
-        name,
+        name: name.trim(),
         role: 'outsider',
       })
+      if (profileError) {
+        console.log('Profile error:', profileError.message)
+        // Don't block registration if profile insert fails
+      }
     }
 
-    Alert.alert('Gelukt! 🎉', 'Check je e-mail om je account te bevestigen.')
-    router.replace('/(auth)/login')
     setLoading(false)
+    Alert.alert('Gelukt! 🎉', 'Check je e-mail om je account te bevestigen.', [
+      { text: 'OK', onPress: () => router.replace('/(auth)/login') }
+    ])
   }
 
   return (
