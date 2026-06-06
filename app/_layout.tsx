@@ -25,13 +25,18 @@ export default function RootLayout() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    )
-  }
-
-  return <Slot />
+  return (
+    <>
+      <Slot />
+      {loading && (
+        <View style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          justifyContent: 'center', alignItems: 'center',
+          backgroundColor: '#FFF0F5',
+        }}>
+          <ActivityIndicator color="#FFB6C1" size="large" />
+        </View>
+      )}
+    </>
+  )
 }

@@ -40,7 +40,7 @@ export default function Home() {
       {/* My dinners */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Mijn diners</Text>
+          <Text style={styles.sectionTitle}>Jouw diners</Text>
           <TouchableOpacity style={styles.addButton} onPress={() => router.push('/(app)/create')}>
             <Text style={styles.addButtonText}>+ Nieuw</Text>
           </TouchableOpacity>
